@@ -1,0 +1,6 @@
+*.xcuserdatad
+*/DerivedData
+Export
+xcuserdata
+.DS_Store
+*.ipa
