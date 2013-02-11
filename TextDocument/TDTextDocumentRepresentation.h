@@ -10,11 +10,11 @@
 
 @interface TDTextDocumentRepresentation : NSObject
 
-@property (nonatomic, readonly) NSString* fileName;
-@property (nonatomic, readonly) NSURL* url;
-@property (nonatomic, retain) NSURL* previewURL;
+@property (nonatomic, readonly) NSString *fileName;
+@property (nonatomic, readonly) NSURL *url;
+@property (nonatomic, retain) NSURL *previewURL;
 
-- (id)initWithFileName:(NSString*)fileName url:(NSURL*)url;
+- (id)initWithFileName:(NSString *)fileName url:(NSURL *)url;
 
 + (NSArray *)loadTextDocuments;
 

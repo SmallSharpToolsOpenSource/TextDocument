@@ -42,11 +42,12 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
+    
+    // clear out the text from the Storyboard
+    self.textView.text = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
-    self.textView.userInteractionEnabled = NO;
-    
     CGFloat textViewHeight = CGRectGetHeight(self.view.frame) - self.keyboardViewHeightConstraint.constant;
     
     // set the height for the keyboard
@@ -60,8 +61,13 @@
             [self openRepresentation:representation];
         }
         else {
-            DebugLog(@"Creating new document");
-            [self createNewDocument];
+            self.textView.userInteractionEnabled = NO;
+            UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"No Documents"
+                                                                message:@"Please tap New to create a new document."
+                                                               delegate:nil
+                                                      cancelButtonTitle:NSLocalizedString(@"OK", @"OK")
+                                                      otherButtonTitles:nil];
+            [alertView show];
         }
     }
     
@@ -124,7 +130,8 @@
     DebugLog(@"closeDocument");
     self.textView.userInteractionEnabled = NO;
     [self.currentTextDocument closeWithCompletionHandler:^(BOOL success) {
-        self.textView.text = @"";
+        self.textView.text = nil;
+        self.currentTextDocument = nil;
     }];
 }
 
@@ -170,10 +177,15 @@
 #pragma mark - UITextViewDelegate
 #pragma mark -
 
+- (BOOL)textViewShouldBeginEditing:(UITextView *)textView {
+    return self.currentTextDocument != nil;
+}
+
 - (void)textViewDidChange:(UITextView *)textView {
-    NSAssert(self.currentTextDocument != nil, @"Invalid State");
-    self.currentTextDocument.text = self.textView.text;
-    [self.currentTextDocument updateChangeCount:UIDocumentChangeDone];
+    if (self.currentTextDocument != nil) {
+        self.currentTextDocument.text = self.textView.text;
+        [self.currentTextDocument updateChangeCount:UIDocumentChangeDone];
+    }
 }
 
 #pragma mark - TDDocumentsViewControllerDelegate

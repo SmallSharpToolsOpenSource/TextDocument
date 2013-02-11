@@ -19,6 +19,8 @@
 @property (strong, nonatomic) NSFileWrapper *fileWrapper;
 @property (strong, nonatomic) NSMutableDictionary *dictionary;
 
+//@property (readonly) NSURL *previewFileURL;
+
 @end
 
 @implementation TDTextDocument
@@ -43,6 +45,16 @@
         [_fileWrapper addFileWrapper:newFileWrapper];
     }
 }
+
+//- (NSURL *)previewFileURL {
+//    NSURL *tempDirectoryURL = [[NSURL fileURLWithPath:NSTemporaryDirectory() isDirectory:YES] URLByAppendingPathComponent:@"Previews"];
+//    NSString *previewFileName = [[[self.fileURL lastPathComponent] stringByDeletingPathExtension] stringByAppendingPathExtension:kPreview];
+//    NSURL *previewFileURL = [tempDirectoryURL URLByAppendingPathComponent:previewFileName];
+//    
+//    DebugLog(@"previewFileURL: %@", previewFileURL);
+//    
+//    return previewFileURL;
+//}
 
 - (NSString *)preview {
     NSString *preview = @"";
@@ -79,6 +91,57 @@
     [document saveToURL:document.fileURL forSaveOperation:UIDocumentSaveForCreating completionHandler:nil];
     
     return document;
+}
+
+#pragma mark - Implementation
+#pragma mark -
+
++ (NSURL *)previewFileURLForFileURL:(NSURL *)fileURL {
+    NSURL *tempDirectoryURL = [[NSURL fileURLWithPath:NSTemporaryDirectory() isDirectory:YES] URLByAppendingPathComponent:@"Previews"];
+    
+    // TODO ensure Previews temp directory exists
+    
+    BOOL isDirectory = TRUE;
+    if (![[NSFileManager defaultManager] fileExistsAtPath:tempDirectoryURL.path isDirectory:&isDirectory]) {
+        NSError *error = nil;
+        [[NSFileManager defaultManager] createDirectoryAtPath:tempDirectoryURL.path withIntermediateDirectories:TRUE attributes:nil error:&error];
+        if (error != nil) {
+            DebugLog(@"Error: %@", error);
+        }
+    }
+    
+    NSString *previewFileName = [[[fileURL lastPathComponent] stringByDeletingPathExtension] stringByAppendingPathExtension:kPreview];
+    NSURL *previewFileURL = [tempDirectoryURL URLByAppendingPathComponent:previewFileName];
+    
+    DebugLog(@"previewFileURL: %@", previewFileURL);
+    
+    return previewFileURL;
+}
+
++ (void)generatePreviewFileForFileURL:(NSURL *)fileURL {
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+       TDTextDocument *textDocument = [[TDTextDocument alloc] initWithFileURL:fileURL];
+       [textDocument openWithCompletionHandler:^(BOOL success) {
+           if (success) {
+               NSString *preview = textDocument.preview;
+               
+               NSURL *previewFileURL = [TDTextDocument previewFileURLForFileURL:fileURL];
+               DebugLog(@"Preparing to Write Preview '%@' to %@", preview, [previewFileURL lastPathComponent]);
+               [[[NSFileCoordinator alloc] initWithFilePresenter:nil] coordinateWritingItemAtURL:previewFileURL options:0 error:nil byAccessor:^(NSURL *writingURL) {
+                   DebugLog(@"Writing Preview: %@ to %@", preview, writingURL);
+//                   [[preview dataUsingEncoding:NSUTF8StringEncoding] writeToURL:writingURL atomically:YES];
+                   
+                   NSError *error = nil;
+                   [[preview dataUsingEncoding:NSUTF8StringEncoding] writeToFile:writingURL.path options:NSDataWritingAtomic error:&error];
+                   if (error != nil) {
+                       DebugLog(@"Error: %@", error);
+                   }
+               }];
+               
+               [textDocument closeWithCompletionHandler:nil];
+           }
+       }];
+   });
 }
 
 #pragma mark - Basic Reading and Writing
@@ -144,16 +207,8 @@
 
     // save the preview
     if (success) {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
-            NSString *previewFileName = [[self.fileURL lastPathComponent] stringByAppendingPathExtension:kPreview];
-            NSURL *dataDirectoryURL = [NSURL fileURLWithPath:NSHomeDirectory() isDirectory:YES];
-            NSURL *previewFileURL = [dataDirectoryURL URLByAppendingPathComponent:previewFileName];
-            DebugLog(@"Preparing to Write Preview '%@' to %@", preview, [previewFileURL lastPathComponent]);
-            [[[NSFileCoordinator alloc] initWithFilePresenter:nil] coordinateWritingItemAtURL:previewFileURL options:0 error:nil byAccessor:^(NSURL *writingURL) {
-                DebugLog(@"Writing Preview: %@ to %@", preview, writingURL);
-                [[preview dataUsingEncoding:NSUTF8StringEncoding] writeToURL:writingURL atomically:YES];
-            }];
-        });
+        [TDTextDocument generatePreviewFileForFileURL:self.fileURL];
+//            [[preview dataUsingEncoding:NSUTF8StringEncoding] writeToURL:previewFileURL atomically:YES];
     }
     else {
         DebugLog(@"Error while writing");

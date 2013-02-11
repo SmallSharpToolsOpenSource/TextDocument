@@ -21,6 +21,10 @@
 
 + (TDTextDocument *)createEmptyDocument;
 
++ (NSURL *)previewFileURLForFileURL:(NSURL *)fileURL;
+
++ (void)generatePreviewFileForFileURL:(NSURL *)fileURL;
+
 @end
 
 @protocol TDTextDocumentDelegate <NSObject>

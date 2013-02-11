@@ -8,6 +8,8 @@
 
 #import "TDTextDocumentRepresentation.h"
 
+#import "TDTextDocument.h"
+
 @implementation TDTextDocumentRepresentation
 
 - (id)initWithFileName:(NSString *)fileName url:(NSURL *)url {
@@ -69,9 +71,11 @@
     for (NSURL *documentURL in localDocuments) {
         if ([documentURL.pathExtension isEqualToString:@"textDocument"]) {
             TDTextDocumentRepresentation *representation = [[TDTextDocumentRepresentation alloc] initWithFileName:[[documentURL lastPathComponent] stringByDeletingPathExtension] url:documentURL];
-            NSString *previewFilePath = [[dataDirectoryURL path] stringByAppendingPathComponent:[[documentURL lastPathComponent] stringByAppendingPathExtension:@"preview"]];
-            if ([[NSFileManager defaultManager] fileExistsAtPath:previewFilePath]) {
-                representation.previewURL = [NSURL fileURLWithPath:previewFilePath];
+            
+            representation.previewURL = [TDTextDocument previewFileURLForFileURL:documentURL];
+            
+            if (![[NSFileManager defaultManager] fileExistsAtPath:representation.previewURL.path]) {
+                [TDTextDocument generatePreviewFileForFileURL:documentURL];
             }
             [representations addObject:representation];
         }
