@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
+#define kTextDocumentStateDidChangeNotification       @"TextDocumentStateDidChangeNotification"
+
 @protocol TDTextDocumentDelegate;
 
 @interface TDTextDocument : UIDocument
@@ -19,11 +21,15 @@
 @property (strong, nonatomic) NSString *text;
 @property (readonly) NSString *preview;
 
-+ (TDTextDocument *)createEmptyDocument;
++ (TDTextDocument *)createTextDocument;
+
++ (void)deleteTextDocument:(TDTextDocument *)textDocument;
 
 + (NSURL *)previewFileURLForFileURL:(NSURL *)fileURL;
 
 + (void)generatePreviewFileForFileURL:(NSURL *)fileURL;
+
+- (BOOL)isEmptyTextDocument;
 
 @end
 

@@ -61,6 +61,7 @@
 }
 
 + (NSArray *)loadTextDocuments {
+    DebugLog(@"loadTextDocuments");
     NSMutableArray *representations = [NSMutableArray array];
     
     // iterate over documents and load them into the array

@@ -31,14 +31,6 @@
 #pragma mark - View Lifecycle
 #pragma mark -
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if (self) {
-        // Custom initialization
-    }
-    return self;
-}
-
 - (void)viewDidLoad {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
@@ -76,10 +68,10 @@
 
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
-    
-    [self closeDocument];
-    
     // TODO if the contents of the text view and document are empty then delete the document
+    if (self.currentTextDocument != nil && !self.currentTextDocument.documentState == UIDocumentStateClosed) {
+        [self closeDocumentWithCompletionHandler:nil];
+    }
 }
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
@@ -117,8 +109,7 @@
 
 - (void)createNewDocument {
     DebugLog(@"Creating empty document");
-    [self closeDocument];
-    TDTextDocument *textDocument = [TDTextDocument createEmptyDocument];
+    TDTextDocument *textDocument = [TDTextDocument createTextDocument];
     textDocument.text = @"";
     self.currentTextDocument = textDocument;
     self.textView.text = textDocument.text;
@@ -126,12 +117,25 @@
     [self.textView becomeFirstResponder];
 }
 
-- (void)closeDocument {
-    DebugLog(@"closeDocument");
+- (void)closeDocumentWithCompletionHandler:(void (^)())completionHandler {
+    DebugLog(@"closeDocumentWithCompletionHandler");
     self.textView.userInteractionEnabled = NO;
     [self.currentTextDocument closeWithCompletionHandler:^(BOOL success) {
-        self.textView.text = nil;
-        self.currentTextDocument = nil;
+        if (success) {
+            if (self.currentTextDocument != nil && [self.currentTextDocument isEmptyTextDocument]) {
+                [TDTextDocument deleteTextDocument:self.currentTextDocument];
+            }
+
+            self.textView.text = nil;
+            self.currentTextDocument = nil;
+        }
+        else {
+            DebugLog(@"Error: Failed to close document successfully");
+        }
+        
+        if (completionHandler != nil) {
+            completionHandler();
+        }
     }];
 }
 
@@ -156,22 +160,21 @@
 #pragma mark -
 
 - (IBAction)newButtonTapped:(id)sender {
-    [self createNewDocument];
+    
+    if (self.currentTextDocument != nil && !self.currentTextDocument.documentState == UIDocumentStateClosed) {
+        [self closeDocumentWithCompletionHandler:^{
+            [self createNewDocument];
+        }];
+    }
+    else {
+        [self createNewDocument];
+    }
 }
 
 - (IBAction)documentsButtonTapped:(id)sender {
-//    if ([self.textView.text isEqualToString:@""] || self.textView.text == nil) {
-//        DebugLog(@"Deleting document because it is empty");
-//        [[[NSFileCoordinator alloc] initWithFilePresenter:nil] coordinateWritingItemAtURL:self.currentTextDocument.fileURL options:NSFileCoordinatorWritingForDeleting error:nil byAccessor:^(NSURL* writingURL) {
-//            NSFileManager* fileManager = [[NSFileManager alloc] init];
-//            [fileManager removeItemAtURL:writingURL error:nil];
-//            self.currentTextDocument = nil;
-//            [self performSegueWithIdentifier:@"HomeToDocuments" sender:self];
-//        }];
-//    }
-//    else {
+    [self closeDocumentWithCompletionHandler:^{
         [self performSegueWithIdentifier:@"HomeToDocuments" sender:self];
-//    }
+    }];
 }
 
 #pragma mark - UITextViewDelegate

@@ -8,6 +8,8 @@
 
 #import "TDDocumentsViewController.h"
 
+#import "TDTextDocument.h"
+
 @interface TDDocumentsViewController ()
 
 @property (strong, nonatomic) NSArray *representations;
@@ -15,6 +17,9 @@
 @end
 
 @implementation TDDocumentsViewController
+
+#pragma mark - View Lifecycle
+#pragma mark -
 
 - (id)initWithStyle:(UITableViewStyle)style {
     self = [super initWithStyle:style];
@@ -37,9 +42,49 @@
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     
+    [[NSNotificationCenter defaultCenter] addObserver: self
+                                             selector: @selector(textDocumentPreviewDidChangeNotification:)
+                                                 name: kTextDocumentStateDidChangeNotification
+                                               object: nil];
+    
     self.representations = [TDTextDocumentRepresentation loadTextDocuments];
     DebugLog(@"self.representations.count: %i", self.representations.count);
     [self.tableView reloadData];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:kTextDocumentStateDidChangeNotification
+                                                  object:nil];
+}
+
+#pragma mark - Private
+#pragma mark -
+
+- (void)refresh {
+    DebugLog(@"refresh");
+    NSArray *reps = [TDTextDocumentRepresentation loadTextDocuments];
+    if ([reps isEqualToArray:self.representations]) {
+        self.representations = reps;
+        [self.tableView reloadData];
+    }
+}
+
+#pragma mark - Notifications
+#pragma mark -
+
+- (void)textDocumentPreviewDidChangeNotification:(NSNotification *)notification {
+    DebugLog(@"Reloading table due to updated preview");
+    [self refresh];
+}
+
+#pragma mark - User Actions
+#pragma mark -
+
+- (IBAction)reloadButtonTapped:(id)sender {
+    [self refresh];
 }
 
 #pragma mark - Table view data source
@@ -51,7 +96,6 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     // Return the number of rows in the section.
-    DebugLog(@"self.representations.count: %i", self.representations.count);
     return self.representations.count;
 }
 
@@ -83,44 +127,24 @@
     return cell;
 }
 
-/*
-// Override to support conditional editing of the table view.
-- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    // Return NO if you do not want the specified item to be editable.
-    return YES;
-}
-*/
-
-/*
-// Override to support editing the table view.
-- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
-{
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
         // Delete the row from the data source
-        [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
-    }   
-    else if (editingStyle == UITableViewCellEditingStyleInsert) {
-        // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-    }   
+        
+        NSAssert(self.representations.count > indexPath.row, @"Invalid State");
+        
+        DebugLog(@"Deleting %i", indexPath.row);
+//        [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
+        
+        TDTextDocumentRepresentation *representation = [self.representations objectAtIndex:indexPath.row];
+        NSMutableArray *reps = [self.representations mutableCopy];
+        [reps removeObjectAtIndex:indexPath.row];
+        self.representations = (NSArray *)reps;
+        [self.tableView reloadData];
+        TDTextDocument *textDocument = [[TDTextDocument alloc] initWithFileURL:representation.url];
+        [TDTextDocument deleteTextDocument:textDocument];
+    }
 }
-*/
-
-/*
-// Override to support rearranging the table view.
-- (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath
-{
-}
-*/
-
-/*
-// Override to support conditional rearranging of the table view.
-- (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    // Return NO if you do not want the item to be re-orderable.
-    return YES;
-}
-*/
 
 #pragma mark - Table view delegate
 
