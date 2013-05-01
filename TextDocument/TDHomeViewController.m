@@ -8,11 +8,12 @@
 
 #import "TDHomeViewController.h"
 
+#import "TDCloudManager.h"
 #import "TDDocumentsViewController.h"
 #import "TDTextDocumentRepresentation.h"
 #import "TDTextDocument.h"
 
-@interface TDHomeViewController () <TDTextDocumentDelegate, TDDocumentsViewControllerDelegate, UITextViewDelegate>
+@interface TDHomeViewController () <TDTextDocumentDelegate, UITextViewDelegate>
 
 - (IBAction)newButtonTapped:(id)sender;
 - (IBAction)documentsButtonTapped:(id)sender;
@@ -45,25 +46,26 @@
     // set the height for the keyboard
     self.textViewHeightConstraint.constant = textViewHeight;
     
-    if (self.currentTextDocument == nil) {
-        NSArray *representations = [TDTextDocumentRepresentation loadTextDocuments];
-        if (representations.count > 0) {
-            DebugLog(@"Opening first document");
-            TDTextDocumentRepresentation *representation = [representations objectAtIndex:0];
-            [self openRepresentation:representation];
-        }
-        else {
-            self.textView.userInteractionEnabled = NO;
-            UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"No Documents"
-                                                                message:@"Please tap New to create a new document."
-                                                               delegate:nil
-                                                      cancelButtonTitle:NSLocalizedString(@"OK", @"OK")
-                                                      otherButtonTitles:nil];
-            [alertView show];
-        }
-    }
-    
-    [self.textView becomeFirstResponder];
+//    if (self.currentTextDocument == nil) {
+//        [[TDCloudManager sharedInstance] loadTextDocumentsWithCompletionBlock:^(NSArray *representations, NSError *error) {
+//            if (representations.count > 0) {
+//                DebugLog(@"Opening first document");
+//                TDTextDocumentRepresentation *representation = [representations objectAtIndex:0];
+//                [self openRepresentation:representation];
+//            }
+//            else {
+//                self.textView.userInteractionEnabled = NO;
+//                UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"No Documents"
+//                                                                    message:@"Please tap New to create a new document."
+//                                                                   delegate:nil
+//                                                          cancelButtonTitle:NSLocalizedString(@"OK", @"OK")
+//                                                          otherButtonTitles:nil];
+//                [alertView show];
+//            }
+//        }];
+//    }
+//    
+//    [self.textView becomeFirstResponder];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -75,11 +77,11 @@
 }
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    if ([@"HomeToDocuments" isEqualToString:segue.identifier]) {
-        NSAssert([segue.destinationViewController isKindOfClass:[TDDocumentsViewController class]], @"Invalid State");
-        TDDocumentsViewController *documentsViewController = (TDDocumentsViewController *)segue.destinationViewController;
-        documentsViewController.delegate = self;
-    }
+//    if ([@"HomeToDocuments" isEqualToString:segue.identifier]) {
+//        NSAssert([segue.destinationViewController isKindOfClass:[TDDocumentsViewController class]], @"Invalid State");
+//        TDDocumentsViewController *documentsViewController = (TDDocumentsViewController *)segue.destinationViewController;
+//        documentsViewController.delegate = self;
+//    }
 }
 
 #pragma mark - Private
@@ -120,23 +122,28 @@
 - (void)closeDocumentWithCompletionHandler:(void (^)())completionHandler {
     DebugLog(@"closeDocumentWithCompletionHandler");
     self.textView.userInteractionEnabled = NO;
-    [self.currentTextDocument closeWithCompletionHandler:^(BOOL success) {
-        if (success) {
-            if (self.currentTextDocument != nil && [self.currentTextDocument isEmptyTextDocument]) {
-                [TDTextDocument deleteTextDocument:self.currentTextDocument];
-            }
+    if (self.currentTextDocument == nil && completionHandler != nil) {
+        completionHandler();
+    }
+    else {
+        [self.currentTextDocument closeWithCompletionHandler:^(BOOL success) {
+            if (success) {
+                if (self.currentTextDocument != nil && [self.currentTextDocument isEmptyTextDocument]) {
+                    [TDTextDocument deleteTextDocument:self.currentTextDocument];
+                }
 
-            self.textView.text = nil;
-            self.currentTextDocument = nil;
-        }
-        else {
-            DebugLog(@"Error: Failed to close document successfully");
-        }
-        
-        if (completionHandler != nil) {
-            completionHandler();
-        }
-    }];
+                self.textView.text = nil;
+                self.currentTextDocument = nil;
+            }
+            else {
+                DebugLog(@"Error: Failed to close document successfully");
+            }
+            
+            if (completionHandler != nil) {
+                completionHandler();
+            }
+        }];
+    }
 }
 
 - (void)documentStateChangedNotification:(NSNotification *)notification {
@@ -160,7 +167,6 @@
 #pragma mark -
 
 - (IBAction)newButtonTapped:(id)sender {
-    
     if (self.currentTextDocument != nil && !self.currentTextDocument.documentState == UIDocumentStateClosed) {
         [self closeDocumentWithCompletionHandler:^{
             [self createNewDocument];
@@ -191,14 +197,14 @@
     }
 }
 
-#pragma mark - TDDocumentsViewControllerDelegate
-#pragma mark -
-
-- (void)textDocumentsViewController:(TDDocumentsViewController *)documentsViewController didChangeTextDocument:(TDTextDocumentRepresentation *)representation {
-    DebugLog(@"didChangeTextDocument: %@", [[representation.url lastPathComponent] stringByDeletingPathExtension]);
-    
-    [self openRepresentation:representation];
-}
+//#pragma mark - TDDocumentsViewControllerDelegate
+//#pragma mark -
+//
+//- (void)textDocumentsViewController:(TDDocumentsViewController *)documentsViewController didChangeTextDocument:(TDTextDocumentRepresentation *)representation {
+//    DebugLog(@"didChangeTextDocument: %@", [[representation.url lastPathComponent] stringByDeletingPathExtension]);
+//    
+//    [self openRepresentation:representation];
+//}
 
 #pragma mark - TDTextDocumentDelegate
 #pragma mark -

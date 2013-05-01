@@ -8,6 +8,8 @@
 
 #import "TDTextDocument.h"
 
+#import "TDCloudManager.h"
+
 #define kText               @"text"
 #define kPreview            @"preview"
 
@@ -18,8 +20,6 @@
 
 @property (strong, nonatomic) NSFileWrapper *fileWrapper;
 @property (strong, nonatomic) NSMutableDictionary *dictionary;
-
-//@property (readonly) NSURL *previewFileURL;
 
 @end
 
@@ -70,8 +70,7 @@
 #pragma mark -
 
 + (TDTextDocument *)createTextDocument {
-    NSURL *dataDirectoryURL = [NSURL fileURLWithPath:NSHomeDirectory() isDirectory:YES];
-    NSURL *documentsDirectoryURL = [dataDirectoryURL URLByAppendingPathComponent:@"Documents"];
+    NSURL *documentsDirectoryURL = [[TDCloudManager sharedInstance] documentsDirectoryURL];
     
     NSString *filename = [NSString stringWithFormat:@"%@.textDocument", [[NSUUID UUID] UUIDString]];
     NSURL *fileURL = [documentsDirectoryURL URLByAppendingPathComponent:filename];
@@ -127,9 +126,11 @@
 }
 
 + (NSURL *)previewFileURLForFileURL:(NSURL *)fileURL {
-    NSURL *tempDirectoryURL = [[NSURL fileURLWithPath:NSTemporaryDirectory() isDirectory:YES] URLByAppendingPathComponent:@"Previews"];
+    // don't store the preview in the ubiquitous directory
     
-    // ensure Previews temp directory exists
+    NSURL *tempDirectoryURL = [[[TDCloudManager sharedInstance] dataDirectoryURL] URLByAppendingPathComponent:@"Previews"];
+
+    // ensure Previews directory exists
     BOOL isDirectory = TRUE;
     if (![[NSFileManager defaultManager] fileExistsAtPath:tempDirectoryURL.path isDirectory:&isDirectory]) {
         NSError *error = nil;
@@ -138,23 +139,8 @@
         }
     }
     
-    NSString *previewFileName = [[[fileURL lastPathComponent] stringByDeletingPathExtension] stringByAppendingPathExtension:kPreview];
-    NSURL *previewFileURL = [tempDirectoryURL URLByAppendingPathComponent:previewFileName];
-    
-    return previewFileURL;
-}
-
-+ (void)generatePreviewFileForFileURL:(NSURL *)fileURL {
-       TDTextDocument *textDocument = [[TDTextDocument alloc] initWithFileURL:fileURL];
-       [textDocument openWithCompletionHandler:^(BOOL success) {
-           if (success) {
-               NSString *preview = textDocument.preview;
-               NSURL *previewFileURL = [TDTextDocument previewFileURLForFileURL:fileURL];
-               
-               [TDTextDocument writePreview:preview toFileURL:previewFileURL];
-               [textDocument closeWithCompletionHandler:nil];
-           }
-       }];
+    NSString *filename = [NSString stringWithFormat:@"%@.%@", [fileURL lastPathComponent], kPreview];
+    return [tempDirectoryURL URLByAppendingPathComponent:filename];
 }
 
 - (BOOL)isEmptyTextDocument {
@@ -167,42 +153,60 @@
 - (void)setupEmptyDocument {
     _dictionary = [NSMutableDictionary dictionary];
     
-    NSFileWrapper *dictFile = [[NSFileWrapper alloc] initRegularFileWithContents:[NSKeyedArchiver archivedDataWithRootObject:_dictionary]];
+    NSData *data = [NSKeyedArchiver archivedDataWithRootObject:_dictionary];
+    NSFileWrapper *dictFile = [[NSFileWrapper alloc] initRegularFileWithContents:data];
     dictFile.preferredFilename = @"dictionary";
     _fileWrapper = [[NSFileWrapper alloc] initDirectoryWithFileWrappers:@{@"dictionary" : dictFile}];
-}
-
-+ (void)writePreview:(NSString *)preview toFileURL:(NSURL *)previewFileURL {
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        [[[NSFileCoordinator alloc] initWithFilePresenter:nil] coordinateWritingItemAtURL:previewFileURL options:0 error:nil byAccessor:^(NSURL *writingURL) {
-            NSError *error = nil;
-            if (![[preview dataUsingEncoding:NSUTF8StringEncoding] writeToFile:writingURL.path options:NSDataWritingAtomic error:&error]) {
-                DebugLog(@"Error: %@", error);
-            }
-            [[NSNotificationCenter defaultCenter] postNotificationName:kTextDocumentStateDidChangeNotification
-                                                                object:nil];
-        }];
-    });
 }
 
 #pragma mark - UIDocument Support
 #pragma mark -
 
 - (BOOL)loadFromContents:(id)contents ofType:(NSString *)typeName error:(NSError **)outError {
+    DebugLog(@"%@ (%@)", NSStringFromSelector(_cmd), [self.fileURL lastPathComponent]);
     
-    DebugLog(@"Loading %@", [self.fileURL lastPathComponent]);
+    // WARNING: Contents may not be downloaded yet
+    // http://stackoverflow.com/questions/10743517/exc-bad-access-using-icloud-on-multiple-devices
+    
+    NSNumber *isInCloud = nil;
+    
+    if ([self.fileURL getResourceValue:&isInCloud forKey:NSURLIsUbiquitousItemKey error:nil]) {
+        DebugLog(@"isInCloud: %@", [isInCloud boolValue] ? @"YES" : @"NO");
+        if ([isInCloud boolValue]) {
+            NSNumber *isDownloaded = nil;
+            if ([self.fileURL getResourceValue:&isDownloaded forKey:NSURLUbiquitousItemIsDownloadedKey error:nil]) {
+                DebugLog(@"isDownloaded: %@", [isDownloaded boolValue] ? @"YES" : @"NO");
+                if (![isDownloaded boolValue]) {
+                    // TODO start the download
+                }
+            }
+        }
+    }
     
     if (contents) {
         _fileWrapper = contents;
-        _dictionary = [[NSKeyedUnarchiver unarchiveObjectWithData:[[[_fileWrapper fileWrappers] valueForKey:@"dictionary"] regularFileContents]] mutableCopy];
+        
+        NSFileWrapper *dictionaryFileWrapper = [[_fileWrapper fileWrappers] valueForKey:@"dictionary"];
+        DebugLog(@"dictionaryFileWrapper: %@", dictionaryFileWrapper);
+        if (dictionaryFileWrapper) {
+            NSData *data = [dictionaryFileWrapper regularFileContents];
+            if (data) {
+                _dictionary = [[NSKeyedUnarchiver unarchiveObjectWithData:data] mutableCopy];
+            }
+        }
         if (!_dictionary) {
             _dictionary = [NSMutableDictionary dictionary];
         }
         
         // load the text file
         NSFileWrapper *textFileWrapper = [[_fileWrapper fileWrappers] valueForKey:kText];
-        NSData *fileData = [textFileWrapper regularFileContents];
-        self.text = [fileData length] > 0 ? [NSString stringWithUTF8String:[fileData bytes]] : @"";
+        if (textFileWrapper) {
+            NSData *fileData = [textFileWrapper regularFileContents];
+            self.text = fileData && [fileData length] > 0 ? [NSString stringWithUTF8String:[fileData bytes]] : @"";
+        }
+        else {
+            self.text = @"";
+        }
     }
     else {
         [self setupEmptyDocument];
@@ -216,6 +220,7 @@
 }
 
 - (id)contentsForType:(NSString *)typeName error:(NSError **)outError {
+    DebugLog(@"%@", NSStringFromSelector(_cmd));
     if (!_fileWrapper) {
         [self setupEmptyDocument];
     }
@@ -224,23 +229,17 @@
 }
 
 - (BOOL)writeContents:(id)contents andAttributes:(NSDictionary *)additionalFileAttributes safelyToURL:(NSURL *)url forSaveOperation:(UIDocumentSaveOperation)saveOperation error:(NSError *__autoreleasing *)outError {
+    DebugLog(@"%@ (%@)", NSStringFromSelector(_cmd), [url lastPathComponent]);
     // If the superclass succeeds in writing out the document, we can write our preview out here as well.
     // This method is invoked on a background queue inside a file coordination block, so writing is safe.
     
-    NSString *preview = self.preview;
-    
-    DebugLog(@"Writing: %@", [self.fileURL lastPathComponent]);
-    DebugLog(@"Text: %@", self.text);
-    DebugLog(@"Preview: %@", preview);
+//    DebugLog(@"Writing: %@", [self.fileURL lastPathComponent]);
+//    DebugLog(@"Text: %@", self.text);
+//    DebugLog(@"Preview: %@", self.preview);
     
     BOOL success = [super writeContents:contents andAttributes:additionalFileAttributes safelyToURL:url forSaveOperation:saveOperation error:outError];
-
-    // save the preview
-    if (success) {
-        NSURL *previewFileURL = [TDTextDocument previewFileURLForFileURL:self.fileURL];
-        [TDTextDocument writePreview:preview toFileURL:previewFileURL];
-    }
-    else {
+    
+    if (!success) {
         DebugLog(@"Error while writing");
     }
     

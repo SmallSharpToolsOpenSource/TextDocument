@@ -4,3 +4,4 @@ Export
 xcuserdata
 .DS_Store
 *.ipa
+TextDocument/TDConstants.h

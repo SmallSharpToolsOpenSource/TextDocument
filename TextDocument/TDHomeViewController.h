@@ -8,8 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-@class TDTextDocument;
-
 @interface TDHomeViewController : UIViewController
 
 @end

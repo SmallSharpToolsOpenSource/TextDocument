@@ -8,19 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-#import "TDTextDocument.h"
-#import "TDTextDocumentRepresentation.h"
-
-@protocol TDDocumentsViewControllerDelegate;
-
 @interface TDDocumentsViewController : UITableViewController
-
-@property (weak, nonatomic) id <TDDocumentsViewControllerDelegate> delegate;
-
-@end
-
-@protocol TDDocumentsViewControllerDelegate <NSObject>
-
-- (void)textDocumentsViewController:(TDDocumentsViewController *)documentsViewController didChangeTextDocument:(TDTextDocumentRepresentation *)representation;
 
 @end

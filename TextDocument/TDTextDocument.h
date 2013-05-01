@@ -27,8 +27,6 @@
 
 + (NSURL *)previewFileURLForFileURL:(NSURL *)fileURL;
 
-+ (void)generatePreviewFileForFileURL:(NSURL *)fileURL;
-
 - (BOOL)isEmptyTextDocument;
 
 @end

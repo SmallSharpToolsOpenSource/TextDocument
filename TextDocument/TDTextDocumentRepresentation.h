@@ -16,6 +16,9 @@
 
 - (id)initWithFileName:(NSString *)fileName url:(NSURL *)url;
 
-+ (NSArray *)loadTextDocuments;
+//+ (NSArray *)loadTextDocuments;
+
+- (NSDate *)fileCreationDate;
+- (NSDate *)fileModificationDate;
 
 @end

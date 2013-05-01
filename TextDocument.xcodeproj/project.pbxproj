@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		262F417D16CB4C9A000430EB /* TDSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 262F417C16CB4C9A000430EB /* TDSettingsViewController.m */; };
 		269823F016C0792B00DA7B8C /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 269823EF16C0792B00DA7B8C /* UIKit.framework */; };
 		269823F216C0792B00DA7B8C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 269823F116C0792B00DA7B8C /* Foundation.framework */; };
 		269823F416C0792B00DA7B8C /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 269823F316C0792B00DA7B8C /* CoreGraphics.framework */; };
@@ -26,6 +27,10 @@
 		2698242F16C0811800DA7B8C /* TDDocumentsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2698242E16C0811800DA7B8C /* TDDocumentsViewController.m */; };
 		2698243216C0836C00DA7B8C /* TDTextDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = 2698243116C0836C00DA7B8C /* TDTextDocument.m */; };
 		2698243516C08F6000DA7B8C /* TDTextDocumentRepresentation.m in Sources */ = {isa = PBXBuildFile; fileRef = 2698243416C08F6000DA7B8C /* TDTextDocumentRepresentation.m */; };
+		26A41D2216F3A87300AC9D04 /* TDEditorViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26A41D2116F3A87300AC9D04 /* TDEditorViewController.m */; };
+		26CA704B16CB35E900779BE8 /* TDCloudManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CA704A16CB35E900779BE8 /* TDCloudManager.m */; };
+		26F26150172C670200CFF7DB /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26F2614F172C670100CFF7DB /* Security.framework */; };
+		26F26154172CB43900CFF7DB /* TDDocumentLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F26153172CB43900CFF7DB /* TDDocumentLoader.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -39,7 +44,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		269823EC16C0792B00DA7B8C /* Text.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Text.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		262F417A16CB4A7C000430EB /* TextDocument.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = TextDocument.entitlements; sourceTree = "<group>"; };
+		262F417B16CB4C9A000430EB /* TDSettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TDSettingsViewController.h; sourceTree = "<group>"; };
+		262F417C16CB4C9A000430EB /* TDSettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TDSettingsViewController.m; sourceTree = "<group>"; };
+		269823EC16C0792B00DA7B8C /* TextDocument.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TextDocument.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		269823EF16C0792B00DA7B8C /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		269823F116C0792B00DA7B8C /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		269823F316C0792B00DA7B8C /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -67,6 +75,16 @@
 		2698243116C0836C00DA7B8C /* TDTextDocument.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TDTextDocument.m; sourceTree = "<group>"; };
 		2698243316C08F6000DA7B8C /* TDTextDocumentRepresentation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TDTextDocumentRepresentation.h; sourceTree = "<group>"; };
 		2698243416C08F6000DA7B8C /* TDTextDocumentRepresentation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TDTextDocumentRepresentation.m; sourceTree = "<group>"; };
+		26A41D2016F3A87300AC9D04 /* TDEditorViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TDEditorViewController.h; sourceTree = "<group>"; };
+		26A41D2116F3A87300AC9D04 /* TDEditorViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TDEditorViewController.m; sourceTree = "<group>"; };
+		26CA704716CB342D00779BE8 /* TDConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TDConstants.h; sourceTree = "<group>"; };
+		26CA704916CB35E900779BE8 /* TDCloudManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TDCloudManager.h; sourceTree = "<group>"; };
+		26CA704A16CB35E900779BE8 /* TDCloudManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TDCloudManager.m; sourceTree = "<group>"; };
+		26CA704D16CB367700779BE8 /* SynthesizeSingleton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SynthesizeSingleton.h; sourceTree = "<group>"; };
+		26F2614F172C670100CFF7DB /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		26F26152172CB43900CFF7DB /* TDDocumentLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TDDocumentLoader.h; sourceTree = "<group>"; };
+		26F26153172CB43900CFF7DB /* TDDocumentLoader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TDDocumentLoader.m; sourceTree = "<group>"; };
+		26F26169173079A500CFF7DB /* libobjc.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libobjc.dylib; path = usr/lib/libobjc.dylib; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -74,6 +92,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				26F26150172C670200CFF7DB /* Security.framework in Frameworks */,
 				269823F016C0792B00DA7B8C /* UIKit.framework in Frameworks */,
 				269823F216C0792B00DA7B8C /* Foundation.framework in Frameworks */,
 				269823F416C0792B00DA7B8C /* CoreGraphics.framework in Frameworks */,
@@ -96,6 +115,7 @@
 		269823E316C0792B00DA7B8C = {
 			isa = PBXGroup;
 			children = (
+				26F26169173079A500CFF7DB /* libobjc.dylib */,
 				269823F516C0792B00DA7B8C /* TextDocument */,
 				2698241916C0792B00DA7B8C /* TextDocumentTests */,
 				269823EE16C0792B00DA7B8C /* Frameworks */,
@@ -106,7 +126,7 @@
 		269823ED16C0792B00DA7B8C /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				269823EC16C0792B00DA7B8C /* Text.app */,
+				269823EC16C0792B00DA7B8C /* TextDocument.app */,
 				2698241216C0792B00DA7B8C /* TextDocumentTests.octest */,
 			);
 			name = Products;
@@ -115,10 +135,11 @@
 		269823EE16C0792B00DA7B8C /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				269823EF16C0792B00DA7B8C /* UIKit.framework */,
-				269823F116C0792B00DA7B8C /* Foundation.framework */,
 				269823F316C0792B00DA7B8C /* CoreGraphics.framework */,
+				269823F116C0792B00DA7B8C /* Foundation.framework */,
+				26F2614F172C670100CFF7DB /* Security.framework */,
 				2698241316C0792B00DA7B8C /* SenTestingKit.framework */,
+				269823EF16C0792B00DA7B8C /* UIKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -127,6 +148,9 @@
 			isa = PBXGroup;
 			children = (
 				269823F616C0792B00DA7B8C /* Supporting Files */,
+				26CA704816CB358700779BE8 /* Model */,
+				26CA704716CB342D00779BE8 /* TDConstants.h */,
+				26CA704D16CB367700779BE8 /* SynthesizeSingleton.h */,
 				269823FE16C0792B00DA7B8C /* TDAppDelegate.h */,
 				269823FF16C0792B00DA7B8C /* TDAppDelegate.m */,
 				2698240716C0792B00DA7B8C /* MainStoryboard.storyboard */,
@@ -134,10 +158,10 @@
 				2698242B16C080EC00DA7B8C /* TDHomeViewController.m */,
 				2698242D16C0811800DA7B8C /* TDDocumentsViewController.h */,
 				2698242E16C0811800DA7B8C /* TDDocumentsViewController.m */,
-				2698243016C0836C00DA7B8C /* TDTextDocument.h */,
-				2698243116C0836C00DA7B8C /* TDTextDocument.m */,
-				2698243316C08F6000DA7B8C /* TDTextDocumentRepresentation.h */,
-				2698243416C08F6000DA7B8C /* TDTextDocumentRepresentation.m */,
+				26A41D2016F3A87300AC9D04 /* TDEditorViewController.h */,
+				26A41D2116F3A87300AC9D04 /* TDEditorViewController.m */,
+				262F417B16CB4C9A000430EB /* TDSettingsViewController.h */,
+				262F417C16CB4C9A000430EB /* TDSettingsViewController.m */,
 			);
 			path = TextDocument;
 			sourceTree = "<group>";
@@ -146,6 +170,7 @@
 			isa = PBXGroup;
 			children = (
 				269823F716C0792B00DA7B8C /* TextDocument-Info.plist */,
+				262F417A16CB4A7C000430EB /* TextDocument.entitlements */,
 				269823F816C0792B00DA7B8C /* InfoPlist.strings */,
 				269823FB16C0792B00DA7B8C /* main.m */,
 				269823FD16C0792B00DA7B8C /* TextDocument-Prefix.pch */,
@@ -175,6 +200,21 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		26CA704816CB358700779BE8 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				26CA704916CB35E900779BE8 /* TDCloudManager.h */,
+				26CA704A16CB35E900779BE8 /* TDCloudManager.m */,
+				26F26152172CB43900CFF7DB /* TDDocumentLoader.h */,
+				26F26153172CB43900CFF7DB /* TDDocumentLoader.m */,
+				2698243016C0836C00DA7B8C /* TDTextDocument.h */,
+				2698243116C0836C00DA7B8C /* TDTextDocument.m */,
+				2698243316C08F6000DA7B8C /* TDTextDocumentRepresentation.h */,
+				2698243416C08F6000DA7B8C /* TDTextDocumentRepresentation.m */,
+			);
+			name = Model;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -192,7 +232,7 @@
 			);
 			name = TextDocument;
 			productName = TextDocument;
-			productReference = 269823EC16C0792B00DA7B8C /* Text.app */;
+			productReference = 269823EC16C0792B00DA7B8C /* TextDocument.app */;
 			productType = "com.apple.product-type.application";
 		};
 		2698241116C0792B00DA7B8C /* TextDocumentTests */ = {
@@ -292,6 +332,10 @@
 				2698242F16C0811800DA7B8C /* TDDocumentsViewController.m in Sources */,
 				2698243216C0836C00DA7B8C /* TDTextDocument.m in Sources */,
 				2698243516C08F6000DA7B8C /* TDTextDocumentRepresentation.m in Sources */,
+				26CA704B16CB35E900779BE8 /* TDCloudManager.m in Sources */,
+				262F417D16CB4C9A000430EB /* TDSettingsViewController.m in Sources */,
+				26A41D2216F3A87300AC9D04 /* TDEditorViewController.m in Sources */,
+				26F26154172CB43900CFF7DB /* TDDocumentLoader.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -353,7 +397,8 @@
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Brennan Stehling (43U3Y2NUGW)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Brennan Stehling (43U3Y2NUGW)";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -366,8 +411,10 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				ONLY_ACTIVE_ARCH = YES;
+				PROVISIONING_PROFILE = "176C3D49-8A10-4138-A369-A232D41E3E44";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "176C3D49-8A10-4138-A369-A232D41E3E44";
 				SDKROOT = iphoneos;
 			};
 			name = Debug;
@@ -384,14 +431,17 @@
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Brennan Stehling (43U3Y2NUGW)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Brennan Stehling (43U3Y2NUGW)";
 				COPY_PHASE_STRIP = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				PROVISIONING_PROFILE = "176C3D49-8A10-4138-A369-A232D41E3E44";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "176C3D49-8A10-4138-A369-A232D41E3E44";
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -400,10 +450,15 @@
 		2698242516C0792B00DA7B8C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = TextDocument/TextDocument.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer: Brennan Stehling (43U3Y2NUGW)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Brennan Stehling (43U3Y2NUGW)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "TextDocument/TextDocument-Prefix.pch";
 				INFOPLIST_FILE = "TextDocument/TextDocument-Info.plist";
-				PRODUCT_NAME = Text;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "7409027A-6612-4462-A5D5-CF24F4F9ED50";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "7409027A-6612-4462-A5D5-CF24F4F9ED50";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -411,10 +466,15 @@
 		2698242616C0792B00DA7B8C /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = TextDocument/TextDocument.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer: Brennan Stehling (43U3Y2NUGW)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Brennan Stehling (43U3Y2NUGW)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "TextDocument/TextDocument-Prefix.pch";
 				INFOPLIST_FILE = "TextDocument/TextDocument-Info.plist";
-				PRODUCT_NAME = Text;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "7409027A-6612-4462-A5D5-CF24F4F9ED50";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "7409027A-6612-4462-A5D5-CF24F4F9ED50";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
@@ -472,6 +532,7 @@
 				2698242616C0792B00DA7B8C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		2698242716C0792B00DA7B8C /* Build configuration list for PBXNativeTarget "TextDocumentTests" */ = {
 			isa = XCConfigurationList;
@@ -480,6 +541,7 @@
 				2698242916C0792B00DA7B8C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
