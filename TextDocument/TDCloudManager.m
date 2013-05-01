@@ -133,6 +133,11 @@ SYNTHESIZE_SINGLETON_FOR_CLASS(TDCloudManager);
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
                 _dataDirectoryURL = [[NSFileManager defaultManager] URLForUbiquityContainerIdentifier:[self ubiquityContainerID]];
                 DebugLog(@"_dataDirectoryURL: %@", _dataDirectoryURL);
+                
+                BOOL isDirectory = TRUE;
+                BOOL exists = [[NSFileManager defaultManager] fileExistsAtPath:_dataDirectoryURL.path isDirectory:&isDirectory];
+                NSAssert(exists, @"Data Directory must exist");
+                
                 dispatch_sync(dispatch_get_main_queue(), ^(void) {
                     [[NSNotificationCenter defaultCenter] postNotificationName:TDUbiquitousContainerFetchingDidEndNotification object:nil];
                     
@@ -143,7 +148,13 @@ SYNTHESIZE_SINGLETON_FOR_CLASS(TDCloudManager);
             });
         }
         else {
+            // The Home Directory is protected while the Documents folder below it can be used to store documents.
             _dataDirectoryURL = [NSURL fileURLWithPath:NSHomeDirectory() isDirectory:YES];
+            DebugLog(@"_dataDirectoryURL: %@", _dataDirectoryURL);
+            
+            if (completionHandler) {
+                completionHandler();
+            }
         }
     }
 }
@@ -172,6 +183,44 @@ SYNTHESIZE_SINGLETON_FOR_CLASS(TDCloudManager);
         [self loadLocalTextDocumentsWithCompletionBlock:completionBlock];
     }
 }
+
+- (void)generatePreviewFileForFileURL:(NSURL *)fileURL {
+    DebugLog(@"%@", NSStringFromSelector(_cmd));
+    
+    if ([[NSFileManager defaultManager] fileExistsAtPath:fileURL.path] && [@"textDocument" isEqualToString:[fileURL pathExtension]]) {
+        TDTextDocument *textDocument = [[TDTextDocument alloc] initWithFileURL:fileURL];
+        [textDocument openWithCompletionHandler:^(BOOL success) {
+            if (success) {
+                NSString *preview = [textDocument.preview copy];
+                [textDocument closeWithCompletionHandler:nil];
+                NSURL *previewFileURL = [TDTextDocument previewFileURLForFileURL:fileURL];
+                DebugLog(@"Generating preview: %@ (%@)", preview, previewFileURL);
+                
+                if (!preview || !preview.length) {
+                    preview = @"Empty";
+                }
+                
+                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                    [[[NSFileCoordinator alloc] initWithFilePresenter:nil] coordinateWritingItemAtURL:previewFileURL options:0 error:nil byAccessor:^(NSURL *writingURL) {
+                        NSError *error = nil;
+                        if (![[preview dataUsingEncoding:NSUTF8StringEncoding] writeToFile:writingURL.path options:NSDataWritingAtomic error:&error]) {
+                            DebugLog(@"Error: %@", error);
+                        }
+                        else {
+                            [[NSNotificationCenter defaultCenter] postNotificationName:TDTextDocumentPreviewStateDidChangeNotification object:nil];
+                        }
+                    }];
+                });
+            }
+            else {
+                DebugLog(@"Unable to open document!");
+            }
+        }];
+    }
+}
+
+#pragma mark - Public Implementation
+#pragma mark -
 
 - (void)loadCloudTextDocumentsWithCompletionBlock:(void (^)(NSArray *representations, NSError *error))completionBlock {
     DebugLog(@"%@", NSStringFromSelector(_cmd));
@@ -249,6 +298,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS(TDCloudManager);
         if ([documentURL.pathExtension isEqualToString:@"textDocument"]) {
             TDTextDocumentRepresentation *representation = [[TDTextDocumentRepresentation alloc] initWithFileName:[[documentURL lastPathComponent] stringByDeletingPathExtension] url:documentURL];
             representation.previewURL = [TDTextDocument previewFileURLForFileURL:documentURL];
+            DebugLog(@"Generating preview for local document");
             [self generatePreviewFileForFileURL:documentURL];
             [representations addObject:representation];
         }
@@ -263,49 +313,6 @@ SYNTHESIZE_SINGLETON_FOR_CLASS(TDCloudManager);
     }];
     
     completionBlock(representations, nil);
-}
-
-- (void)generatePreviewFileForFileURL:(NSURL *)fileURL {
-    DebugLog(@"%@", NSStringFromSelector(_cmd));
-    
-    if ([[NSFileManager defaultManager] fileExistsAtPath:fileURL.path]) {
-        TDTextDocument *textDocument = [[TDTextDocument alloc] initWithFileURL:fileURL];
-        [textDocument openWithCompletionHandler:^(BOOL success) {
-            if (success) {
-                NSString *preview = [textDocument.preview copy];
-                [textDocument closeWithCompletionHandler:nil];
-                NSURL *previewFileURL = [TDTextDocument previewFileURLForFileURL:fileURL];
-//                BOOL exists = [[NSFileManager defaultManager] fileExistsAtPath:[previewFileURL path]];
-//                
-//                // check if the preview file is current with the source file
-//                NSDate *fileDate = [self fileModificationDate:fileURL];
-//                NSDate *previewDate = [self fileModificationDate:previewFileURL];
-//                
-//                DebugLog(@"fileDate: %@", fileDate);
-//                DebugLog(@"previewDate: %@", previewDate);
-                
-//                if (!exists || [self isDate:fileDate afterOtherDate:previewDate]) {
-                    DebugLog(@"Generating preview: %@ (%@)", preview, previewFileURL);
-                    
-                    NSAssert(preview && preview.length, @"Invalid State");
-                    
-                    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                        [[[NSFileCoordinator alloc] initWithFilePresenter:nil] coordinateWritingItemAtURL:previewFileURL options:0 error:nil byAccessor:^(NSURL *writingURL) {
-                            NSError *error = nil;
-                            if (![[preview dataUsingEncoding:NSUTF8StringEncoding] writeToFile:writingURL.path options:NSDataWritingAtomic error:&error]) {
-                                DebugLog(@"Error: %@", error);
-                            }
-                            [[NSNotificationCenter defaultCenter] postNotificationName:TDTextDocumentPreviewStateDidChangeNotification object:nil];
-                        }];
-                    });
-//                }
-//                else {
-//                    DebugLog(@"Preview is current");
-//                }
-            }
-            
-        }];
-    }
 }
 
 - (NSDate *)fileModificationDate:(NSURL *)url {

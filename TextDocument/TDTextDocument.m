@@ -128,19 +128,22 @@
 + (NSURL *)previewFileURLForFileURL:(NSURL *)fileURL {
     // don't store the preview in the ubiquitous directory
     
-    NSURL *tempDirectoryURL = [[[TDCloudManager sharedInstance] dataDirectoryURL] URLByAppendingPathComponent:@"Previews"];
-
+    NSString *cacheDirectory = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+    NSURL *cacheURL = [NSURL fileURLWithPath:cacheDirectory isDirectory:YES];
+    NSURL *previewsURL = [cacheURL URLByAppendingPathComponent:@"Previews"];
+    
     // ensure Previews directory exists
     BOOL isDirectory = TRUE;
-    if (![[NSFileManager defaultManager] fileExistsAtPath:tempDirectoryURL.path isDirectory:&isDirectory]) {
+    if (![[NSFileManager defaultManager] fileExistsAtPath:previewsURL.path isDirectory:&isDirectory]) {
         NSError *error = nil;
-        if (![[NSFileManager defaultManager] createDirectoryAtPath:tempDirectoryURL.path withIntermediateDirectories:TRUE attributes:nil error:&error]) {
+        if (![[NSFileManager defaultManager] createDirectoryAtPath:previewsURL.path withIntermediateDirectories:TRUE attributes:nil error:&error]) {
             DebugLog(@"Error: %@", error);
         }
     }
     
     NSString *filename = [NSString stringWithFormat:@"%@.%@", [fileURL lastPathComponent], kPreview];
-    return [tempDirectoryURL URLByAppendingPathComponent:filename];
+    DebugLog(@"filename: %@", filename);
+    return [previewsURL URLByAppendingPathComponent:filename];
 }
 
 - (BOOL)isEmptyTextDocument {

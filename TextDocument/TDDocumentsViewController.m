@@ -89,6 +89,7 @@
 #pragma mark -
 
 - (void)updateCell:(UITableViewCell *)cell atIndexPath:(NSIndexPath *)indexPath {
+    DebugLog(@"updating %i", indexPath.row);
     NSAssert(self.representations.count > indexPath.row, @"Invalid State");
     TDTextDocumentRepresentation *representation = [self.representations objectAtIndex:indexPath.row];
     
@@ -100,7 +101,6 @@
         if (preview != nil && ![@"" isEqualToString:preview]) {
             DebugLog(@"Setting preview: %@ (%i)", preview, indexPath.row);
             cell.textLabel.text = preview;
-            [cell.textLabel setNeedsDisplay];
         }
         else {
             cell.textLabel.text = @"Loading...";
@@ -138,7 +138,7 @@
 
 - (void)textDocumentPreviewDidChangeNotification:(NSNotification *)notification {
     DebugLog(@"%@", NSStringFromSelector(_cmd));
-
+    
     for (NSIndexPath *indexPath in self.tableView.indexPathsForVisibleRows) {
         UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
         [self updateCell:cell atIndexPath:indexPath];
